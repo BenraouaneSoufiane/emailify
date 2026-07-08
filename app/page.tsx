@@ -40,25 +40,6 @@ const docsSteps = [
   },
 ];
 
-const pipelineSteps = [
-  {
-    title: "Identify",
-    body: "Attach the sending agent DID, wallet, and public service profile.",
-  },
-  {
-    title: "Price",
-    body: "Use pay-per-message terms so every accepted send has a clear cost.",
-  },
-  {
-    title: "Dispatch",
-    body: "POST the message payload with HTML body and optional attachments.",
-  },
-  {
-    title: "Settle",
-    body: "Meter the send, release payment, and update verifiable reputation.",
-  },
-];
-
 const orderExample = `{
   "service": "Email delivery",
   "capability": "email.delivery",
@@ -94,7 +75,6 @@ export default function Home() {
           </a>
           <div className="nav-actions">
             <a href="#docs">Docs</a>
-            <a href="#pipeline">Pipeline</a>
             <a href="#signals">Signals</a>
             <button className="icon-button" type="button" aria-label="Open delivery health">
               <BarChart3 size={18} aria-hidden="true" />
@@ -189,22 +169,6 @@ export default function Home() {
               <code>{orderExample}</code>
             </pre>
           </div>
-        </div>
-      </section>
-
-      <section className="pipeline-section" id="pipeline">
-        <div>
-          <p className="section-kicker">Croo-backed pipeline</p>
-          <h2>Email delivery with pay-per-message settlement.</h2>
-        </div>
-        <div className="pipeline">
-          {pipelineSteps.map((step, index) => (
-            <div className="pipeline-step" key={step.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{step.title}</strong>
-              <p>{step.body}</p>
-            </div>
-          ))}
         </div>
       </section>
     </main>
