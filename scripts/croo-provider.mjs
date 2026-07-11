@@ -1,5 +1,6 @@
 import { AgentClient, DeliverableType, EventType } from "@croo-network/sdk";
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 function loadDotEnv(path = ".env") {
   let content;
@@ -41,25 +42,13 @@ function loadDotEnv(path = ".env") {
 
 loadDotEnv();
 
-const requiredEnv = ["CROO_API_URL", "CROO_WS_URL", "CROO_SDK_KEY"];
-const missingEnv = requiredEnv.filter((key) => !process.env[key]);
-
-if (missingEnv.length > 0) {
-  console.error(`Missing required env: ${missingEnv.join(", ")}`);
-  process.exit(1);
-}
-
-if (process.env.CROO_SDK_KEY === "replace_with_your_croo_sk_key") {
-  console.error("Set CROO_SDK_KEY in .env to the API key from your Croo dashboard.");
-  process.exit(1);
-}
-
 const baseURL = process.env.EMAILIFY_BASE_URL || "http://localhost:3333";
 const deliverableType =
   process.env.CROO_DELIVERABLE_TYPE === DeliverableType.Text
     ? DeliverableType.Text
     : DeliverableType.Schema;
 const secrets = [process.env.CROO_SDK_KEY].filter(Boolean);
+let client;
 
 function redact(value) {
   if (typeof value === "string") {
@@ -86,17 +75,30 @@ const redactingLogger = {
   debug: (message, ...args) => console.debug(redact(message), ...args.map(redact)),
 };
 
-const client = new AgentClient(
-  {
-    baseURL: process.env.CROO_API_URL,
-    wsURL: process.env.CROO_WS_URL,
-    rpcURL: process.env.BASE_RPC_URL,
-    logger: redactingLogger,
-  },
-  process.env.CROO_SDK_KEY,
-);
+function createClient() {
+  const requiredEnv = ["CROO_API_URL", "CROO_WS_URL", "CROO_SDK_KEY"];
+  const missingEnv = requiredEnv.filter((key) => !process.env[key]);
 
-function parseRequirements(raw) {
+  if (missingEnv.length > 0) {
+    throw new Error(`Missing required env: ${missingEnv.join(", ")}`);
+  }
+
+  if (process.env.CROO_SDK_KEY === "replace_with_your_croo_sk_key") {
+    throw new Error("Set CROO_SDK_KEY in .env to the API key from your Croo dashboard.");
+  }
+
+  return new AgentClient(
+    {
+      baseURL: process.env.CROO_API_URL,
+      wsURL: process.env.CROO_WS_URL,
+      rpcURL: process.env.BASE_RPC_URL,
+      logger: redactingLogger,
+    },
+    process.env.CROO_SDK_KEY,
+  );
+}
+
+export function parseRequirements(raw) {
   if (!raw) {
     return {};
   }
@@ -116,22 +118,38 @@ function parseRequirements(raw) {
   }
 }
 
-function normalizeAction(requirements) {
+export function normalizeAction(requirements) {
   const rawAction =
     requirements.action ||
     requirements.operation ||
     requirements.endpoint ||
     requirements.service ||
-    requirements.type;
+    requirements.type ||
+    requirements.task;
 
   if (typeof rawAction === "string") {
     const action = rawAction.trim().toLowerCase();
 
-    if (["send", "sendemail", "send_email", "email"].includes(action)) {
+    if (
+      ["send", "sendemail", "send_email", "email"].includes(action) ||
+      (action.startsWith("send") && action.includes("email"))
+    ) {
       return "send";
     }
 
-    if (["newtemplate", "new_template", "template", "create_template"].includes(action)) {
+    if (
+      [
+        "newtemplate",
+        "new_template",
+        "template",
+        "create_template",
+        "new template",
+        "generate_template",
+        "generate template",
+        "email_template",
+        "email template",
+      ].includes(action)
+    ) {
       return "newTemplate";
     }
 
@@ -148,9 +166,28 @@ function normalizeAction(requirements) {
     ) {
       return "reserveSender";
     }
+
+    if (
+      [
+        "checkinbox",
+        "check_inbox",
+        "check inbox",
+        "inbox",
+        "messages",
+        "mailbox",
+        "read_inbox",
+        "read inbox",
+      ].includes(action)
+    ) {
+      return "checkInbox";
+    }
   }
 
-  if (requirements.to && requirements.title && requirements.body) {
+  if (
+    requirements.to &&
+    (requirements.title || requirements.subject) &&
+    (requirements.body || requirements.description)
+  ) {
     return "send";
   }
 
@@ -158,16 +195,29 @@ function normalizeAction(requirements) {
     return "reserveSender";
   }
 
-  if (requirements.description) {
+  if ((requirements.username || requirements.address) && requirements.password) {
+    return "checkInbox";
+  }
+
+  if (
+    requirements.description ||
+    requirements.prompt ||
+    requirements.brief ||
+    requirements.template ||
+    requirements.templateDescription ||
+    requirements.template_description ||
+    requirements.emailDescription ||
+    requirements.email_description
+  ) {
     return "newTemplate";
   }
 
   throw new Error(
-    "requirements must include action/send/newTemplate/reserveSender, or fields that imply one.",
+    "requirements must include action/send/newTemplate/reserveSender/checkInbox, or fields that imply one.",
   );
 }
 
-function routeForAction(action) {
+export function routeForAction(action) {
   switch (action) {
     case "send":
       return "/api/croo/send";
@@ -175,23 +225,48 @@ function routeForAction(action) {
       return "/api/croo/newTemplate";
     case "reserveSender":
       return "/api/croo/reserveSender";
+    case "checkInbox":
+      return "/api/croo/checkInbox";
     default:
       throw new Error(`Unsupported action: ${action}`);
   }
 }
 
-function payloadForAction(action, requirements) {
+export function payloadForAction(action, requirements) {
   const {
     action: _action,
     operation: _operation,
     endpoint: _endpoint,
     service: _service,
     type: _type,
+    task: _task,
     ...payload
   } = requirements;
 
-  if (action === "newTemplate" && payload.image_url && !payload.imageUrl) {
-    payload.imageUrl = payload.image_url;
+  if (action === "send") {
+    if (payload.subject && !payload.title) {
+      payload.title = payload.subject;
+    }
+
+    if (payload.description && !payload.body) {
+      payload.body = payload.description;
+    }
+  }
+
+  if (action === "newTemplate") {
+    payload.description =
+      payload.description ||
+      payload.prompt ||
+      payload.brief ||
+      payload.templateDescription ||
+      payload.template_description ||
+      payload.emailDescription ||
+      payload.email_description ||
+      payload.template;
+
+    if (payload.image_url && !payload.imageUrl) {
+      payload.imageUrl = payload.image_url;
+    }
   }
 
   return payload;
@@ -290,6 +365,7 @@ async function deliverOrder(event) {
 }
 
 async function main() {
+  client = createClient();
   const stream = await client.connectWebSocket();
 
   stream.onAny((event) => {
@@ -329,7 +405,9 @@ async function main() {
   console.log("Emailify Croo provider is online.");
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

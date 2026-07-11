@@ -7,20 +7,32 @@ All CROO-facing endpoints accept `POST` JSON bodies.
 - `/api/croo/newTemplate`
   - `description` string, required
   - `imageUrl` string, optional
-  - Returns `{ ok, html }`
+  - Sends `description` and `imageUrl` to Venice.ai for template generation
+  - Returns `{ ok, html, response, model }`
 - `/api/croo/reserveSender`
   - `username` string, required
   - `name` string, required
+  - `password` string, required. Keep this password; it is used to send from the reserved address and can be reused for inbox login.
   - Creates `username@emailify.site` under `EMAILIFY_SENDER_ROOT`
-  - Returns `{ ok, sender, proof }`. Keep `proof`; it is required to send from the reserved address.
+  - Returns `{ ok, sender }`
 - `/api/croo/send`
   - `to` string, required
   - `title` string, required
   - `body` string, required, HTML accepted
-  - `sender`, `senderAddress`, or `from` string, optional reserved sender address
-  - `senderpoof` string, required when using a reserved sender address. `senderproof` and `senderProof` are also accepted.
+  - `from` string, required sender address
+  - `fromName` or `from_name` string, required display name
+  - `password` string, required only when `from` matches an existing reserved sender.
   - `reply_to` or `replyTo` string, optional
   - `attachment` or `attachement`, optional. Use a URL/path string, an object with `url`, `path`, or base64 `content`, or an array of those.
+- `/api/croo/checkInbox`
+  - `username` string, required. May be the reserved username, such as `sales`, or the full reserved address.
+  - `address` string, optional alias for `username`
+  - `password` string, required
+  - Returns `{ ok, inbox, messages }`, where each message has `id`, `from`, `to`, `subject`, `date`, `preview`, and `body`.
+- `/api/inbox/login`
+  - `address` string, required reserved Emailify address
+  - `password` string, required
+  - Returns `{ ok, inbox, messages }` for the local `/inbox` mailbox page.
 
 ## Environment
 
@@ -28,7 +40,10 @@ All CROO-facing endpoints accept `POST` JSON bodies.
 EMAILIFY_DOMAIN=emailify.site
 EMAILIFY_FROM="Emailify <no-reply@emailify.site>"
 EMAILIFY_SENDER_ROOT=/var/mail/emailify/senders
+EMAILIFY_POSTFIX_VIRTUAL_MAP=/var/mail/emailify/virtual_mailbox_maps
 SENDMAIL_PATH=/usr/sbin/sendmail
+VENICE_API_KEY=replace_with_your_venice_api_key
+VENICE_MODEL=zai-org-glm-5-1
 ```
 
 ## CROO Provider
@@ -69,11 +84,15 @@ Requester requirements should be a JSON object string. Supported actions:
 ```
 
 ```json
-{"action":"reserveSender","username":"sales","name":"Sales Team"}
+{"action":"reserveSender","username":"sales","name":"Sales Team","password":"keep-this-secret"}
 ```
 
 ```json
-{"action":"send","to":"customer@example.com","title":"Hello","body":"<p>Welcome</p>","sender":"sales@emailify.site","senderpoof":"proof_returned_by_reserveSender"}
+{"action":"send","to":"customer@example.com","title":"Hello","body":"<p>Welcome</p>","from":"sales@emailify.site","fromName":"Sales Team","password":"keep-this-secret"}
+```
+
+```json
+{"action":"checkInbox","username":"sales","password":"keep-this-secret"}
 ```
 
 If `action` is omitted, the provider infers it from required fields.
@@ -114,22 +133,31 @@ inet_interfaces = all
 inet_protocols = ipv4
 virtual_mailbox_domains = emailify.site
 virtual_mailbox_base = /var/mail/emailify/senders
-virtual_mailbox_maps = regexp:/etc/postfix/virtual_mailbox_maps
+virtual_mailbox_maps = texthash:/var/mail/emailify/virtual_mailbox_maps
 virtual_minimum_uid = 33
 virtual_uid_maps = static:33
 virtual_gid_maps = static:33
 ```
 
-Map any provisioned username to its Maildir in `/etc/postfix/virtual_mailbox_maps`:
+`reserveSender` maintains the exact-address map at
+`/var/mail/emailify/virtual_mailbox_maps`. Existing senders can be seeded with:
+
+```sh
+sudo find /var/mail/emailify/senders -maxdepth 1 -mindepth 1 -type d \
+  -printf '%f@emailify.site %f/Maildir/\n' \
+  | sudo tee /var/mail/emailify/virtual_mailbox_maps >/dev/null
+sudo chown www-data:www-data /var/mail/emailify/virtual_mailbox_maps
+```
+
+The map should contain one line per provisioned sender:
 
 ```conf
-/^([^@]+)@emailify\.site$/ ${1}/Maildir/
+sales@emailify.site sales/Maildir/
 ```
 
 Reload Postfix:
 
 ```sh
-sudo postmap /etc/postfix/virtual_mailbox_maps
 sudo systemctl restart postfix
 ```
 

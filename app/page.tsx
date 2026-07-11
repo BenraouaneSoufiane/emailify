@@ -6,10 +6,15 @@ import {
   ClipboardCheck,
   Code2,
   CreditCard,
+  Inbox,
+  LogIn,
   ShieldCheck,
   Zap,
 } from "lucide-react";
 import { RotatingKeyword } from "@/components/RotatingKeyword";
+
+const crooAgentUrl =
+  "https://agent.croo.network/agents/53be746a-820c-41c9-8d97-6badd0a76e62";
 
 const checks = [
   "No DNS records needed (SPF, DKIM, ...)",
@@ -21,7 +26,7 @@ const docsSteps = [
   {
     icon: Code2,
     title: "Create order",
-    body: "Submit the email request as a structured CAP order with recipient, subject, body, and optional reply-to.",
+    body: "Submit the email request as a structured CAP order with recipient, title, body, sender, and optional reply-to.",
   },
   {
     icon: CreditCard,
@@ -40,16 +45,75 @@ const docsSteps = [
   },
 ];
 
-const orderExample = `{
-  "service": "Email delivery",
-  "capability": "email.delivery",
-  "inputs": {
-    "to": "customer@example.com",
-    "reply_to": "support@yourdomain.com",
-    "subject": "Your update is ready",
-    "body": "<h1>Hello from Emailify</h1>"
+const pricingItems = [
+  {
+    label: "Reserve a sender",
+    price: "0.1 USDC",
+    detail: "Create a ready-to-use sender for your messages.",
   },
-  "price": "pay_per_message"
+  {
+    label: "Send a message",
+    price: "0.01 USDC",
+    detail: "Pay only when Emailify delivers a new email.",
+  },
+  {
+    label: "Receive and check messages",
+    price: "Free*",
+    detail: "Getting messages through CROO is not totally free, but almost free: only 0.0001 USDC.",
+  },
+];
+
+const comparisonRows = [
+  {
+    feature: "Pricing model",
+    emailify: "Pay as you go",
+    native: "Plans start around $10",
+  },
+  {
+    feature: "Sender setup",
+    emailify: "Senders are set up automatically",
+    native: "Sender setup is manual",
+  },
+  {
+    feature: "Domain setup",
+    emailify: "Send on behalf of the Emailify domain with your desired inbox and no DNS configuration",
+    native: "Send on behalf of your domain, with DNS configuration required",
+  },
+  {
+    feature: "Payment",
+    emailify: "Wallet with USDC on Base",
+    native: "Credit card",
+  },
+  {
+    feature: "Sending surface",
+    emailify: "CROO UI or integration",
+    native: "API only",
+  },
+  {
+    feature: "Developer path",
+    emailify: "CROO SDK",
+    native: "Any SMTP library",
+  },
+  {
+    feature: "Inbox access",
+    emailify: "Can receive and check emails",
+    native: "Only sends emails, with no UI to check received messages",
+  },
+  {
+    feature: "Onboarding speed",
+    emailify: "1 inbox in 1 second or 1 order",
+    native: "Up to 10 minutes of onboarding",
+  },
+];
+
+const orderExample = `{
+  "action": "send",
+  "to": "customer@example.com",
+  "from": "binanceSupport@emailify.site",
+  "fromName": "Emma Johnson",
+  "reply_to": "binanceSupport@emailify.site",
+  "title": "Your update is ready",
+  "body": "<h1>Emma from Binance support,...</h1>"
 }`;
 
 export default function Home() {
@@ -75,10 +139,27 @@ export default function Home() {
           </a>
           <div className="nav-actions">
             <a href="#docs">Docs</a>
+            <a href="#pricing">Pricing</a>
             <a href="#signals">Signals</a>
-            <button className="icon-button" type="button" aria-label="Open delivery health">
+            <a
+              className="nav-cta nav-cta-primary"
+              href={crooAgentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Inbox size={16} aria-hidden="true" />
+              Get inbox
+            </a>
+            <a
+              className="nav-cta"
+              href="/inbox"
+            >
+              <LogIn size={16} aria-hidden="true" />
+              Login
+            </a>
+            <a className="icon-button" href="#signals" aria-label="Open delivery health">
               <BarChart3 size={18} aria-hidden="true" />
-            </button>
+            </a>
           </div>
         </nav>
 
@@ -86,22 +167,27 @@ export default function Home() {
           <div className="hero-copy">
             <div className="eyebrow">
               <ShieldCheck size={16} aria-hidden="true" />
-              Transactional email command center
+              Instant email delivery through CROO
             </div>
             <h1>
-              deliver quicky <RotatingKeyword /> emails
+              deliver quickly <RotatingKeyword /> emails
             </h1>
             <p>
               One clean delivery layer for auth, growth, moments, and state changes,
               with routing intelligence that keeps every message moving.
             </p>
             <div className="cta-row">
-              <a className="primary-cta" href="#docs">
+              <a
+                className="primary-cta"
+                href={crooAgentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Start sending
                 <ArrowRight size={18} aria-hidden="true" />
               </a>
               <a className="secondary-cta" href="#signals">
-                View signals
+                View pricing
               </a>
             </div>
             <div className="check-list" aria-label="Setup highlights">
@@ -113,25 +199,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="signal-band" id="signals" aria-label="Delivery signals">
-        <div className="signal">
-          <span>Inbox placement</span>
-          <strong>98.7%</strong>
-        </div>
-        <div className="signal">
-          <span>Queue latency</span>
-          <strong>11 ms</strong>
-        </div>
-        <div className="signal">
-          <span>State webhooks</span>
-          <strong>24/7</strong>
-        </div>
-        <div className="signal">
-          <span>Template drift</span>
-          <strong>0.2%</strong>
         </div>
       </section>
 
@@ -169,6 +236,70 @@ export default function Home() {
               <code>{orderExample}</code>
             </pre>
           </div>
+        </div>
+      </section>
+
+      <section className="pricing-section" id="pricing">
+        <div className="pricing-heading">
+          <p className="section-kicker">Pricing</p>
+          <h2>Usage-based delivery, without provider setup overhead.</h2>
+        </div>
+
+        <div className="pricing-layout">
+          <div className="pricing-card" aria-label="Emailify pricing">
+            {pricingItems.map((item) => (
+              <div className="price-line" key={item.label}>
+                <div>
+                  <span>{item.label}</span>
+                  <p>{item.detail}</p>
+                </div>
+                <strong>
+                  {item.price.endsWith("*") ? (
+                    <>
+                      {item.price.slice(0, -1)}
+                      <sup aria-label="pricing note">*</sup>
+                    </>
+                  ) : (
+                    item.price
+                  )}
+                </strong>
+              </div>
+            ))}
+          </div>
+
+          <div className="comparison-table" aria-label="Emailify and native SMTP provider comparison">
+            <div className="comparison-row comparison-head">
+              <span>Capability</span>
+              <span>Emailify</span>
+              <span>Native SMTP providers</span>
+            </div>
+            {comparisonRows.map((row) => (
+              <div className="comparison-row" key={row.feature}>
+                <span>{row.feature}</span>
+                <span>{row.emailify}</span>
+                <span>{row.native}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="signal-band" id="signals" aria-label="Delivery signals">
+        <div className="signal">
+          <span>Inbox placement</span>
+          <strong>98.7%</strong>
+        </div>
+        <div className="signal">
+          <span>Queue latency</span>
+          <strong>11 ms</strong>
+        </div>
+        <div className="signal">
+          <span>State webhooks</span>
+          <strong>24/7</strong>
+        </div>
+        <div className="signal">
+          <span>Template drift</span>
+          <strong>0.2%</strong>
         </div>
       </section>
     </main>

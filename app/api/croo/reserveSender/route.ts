@@ -8,12 +8,13 @@ export async function POST(request: Request) {
     const body = await readJson(request);
     const username = requireString(body, "username");
     const name = requireString(body, "name");
-    const sender = await createSender(username, name);
+    const password = requireString(body, "password");
+    const sender = await createSender(username, name, password);
+    const { passwordHash: _passwordHash, proof: _proof, ...publicSender } = sender;
 
     return ok(
       {
-        sender,
-        proof: sender.proof,
+        sender: publicSender,
         senderPath: `${getBaseUrl(request)}/api/croo/reserveSender`,
       },
       201,

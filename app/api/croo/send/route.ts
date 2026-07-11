@@ -1,6 +1,6 @@
 import { fail, ok, optionalString, readJson, requireString } from "@/lib/croo";
 import { sendEmail } from "@/lib/mailer";
-import { requireSenderProof } from "@/lib/senders";
+import { findSenderByAddress, requireSenderPassword } from "@/lib/senders";
 
 export const runtime = "nodejs";
 
@@ -8,27 +8,25 @@ export async function POST(request: Request) {
   try {
     const body = await readJson(request);
     const to = requireString(body, "to");
-    const title = requireString(body, "title");
-    const htmlBody = requireString(body, "body");
+    const title = optionalString(body, "title") || requireString(body, "subject", "title or subject");
+    const htmlBody = optionalString(body, "body") || requireString(body, "description", "body or description");
     const replyTo = optionalString(body, "reply_to") || optionalString(body, "replyTo");
-    const senderAddress =
-      optionalString(body, "sender") ||
-      optionalString(body, "senderAddress") ||
-      optionalString(body, "from");
-    const senderProof =
-      optionalString(body, "senderpoof") ||
-      optionalString(body, "senderproof") ||
-      optionalString(body, "senderProof");
+    const senderAddress = requireString(body, "from");
+    const fromName = optionalString(body, "fromName") || requireString(body, "from_name", "fromName");
+    const password = optionalString(body, "password");
     const attachment = body.attachment ?? body.attachement;
-    let from: string | undefined;
+    const reservedSender = await findSenderByAddress(senderAddress);
+    let from = `${fromName} <${senderAddress}>`;
 
-    if (senderAddress) {
-      if (!senderProof) {
-        throw new Error("senderpoof is required when using a reserved sender.");
+    if (reservedSender) {
+      if (!password) {
+        throw new Error(
+          "password is required for this reserved sender, or change the sender to something else.",
+        );
       }
 
-      const reservedSender = await requireSenderProof(senderAddress, senderProof);
-      from = `${reservedSender.name} <${reservedSender.address}>`;
+      const verifiedSender = await requireSenderPassword(senderAddress, password);
+      from = `${fromName || verifiedSender.name} <${verifiedSender.address}>`;
     }
 
     const result = await sendEmail({

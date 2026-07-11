@@ -75,6 +75,7 @@ button {
 .brand,
 .nav-actions,
 .eyebrow,
+.nav-cta,
 .primary-cta,
 .secondary-cta,
 .icon-button {
@@ -112,9 +113,27 @@ button {
   font-weight: 700;
 }
 
+.nav-cta {
+  min-height: 40px;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 13px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  white-space: nowrap;
+}
+
+.nav-cta-primary {
+  border-color: var(--ink);
+  color: white;
+  background: var(--ink);
+}
+
 .icon-button {
   color: var(--ink);
   cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .hero-content {
@@ -237,7 +256,8 @@ h1 {
 }
 
 .signal-band,
-.docs-section {
+.docs-section,
+.pricing-section {
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
 }
@@ -246,7 +266,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
-  transform: translateY(-32px);
+  margin-bottom: 76px;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
@@ -274,10 +294,11 @@ h1 {
 }
 
 .docs-section {
-  padding: 28px 0 76px;
+  padding: 28px 0 54px;
 }
 
-.docs-heading {
+.docs-heading,
+.pricing-heading {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -286,7 +307,8 @@ h1 {
   text-align: left;
 }
 
-.docs-heading h2 {
+.docs-heading h2,
+.pricing-heading h2 {
   margin-top: 10px;
   max-width: none;
   font-size: clamp(34px, 4.6vw, 62px);
@@ -300,6 +322,105 @@ h1 {
   color: var(--muted);
   font-size: 18px;
   line-height: 1.5;
+}
+
+.pricing-section {
+  padding: 0 0 76px;
+}
+
+.pricing-heading h2 {
+  max-width: 860px;
+}
+
+.pricing-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.34fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.pricing-card,
+.comparison-table {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdfa;
+  overflow: hidden;
+}
+
+.pricing-card {
+  display: grid;
+}
+
+.price-line {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.price-line:last-child {
+  border-bottom: 0;
+}
+
+.price-line span,
+.comparison-row span:first-child {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.price-line p {
+  margin-top: 8px;
+  color: #3f4851;
+  line-height: 1.45;
+}
+
+.price-line strong {
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 0.95;
+}
+
+.price-line sup {
+  margin-left: 2px;
+  font-size: 0.38em;
+  line-height: 0;
+  vertical-align: super;
+}
+
+.comparison-table {
+  display: grid;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.58fr) repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  color: #303942;
+  line-height: 1.42;
+}
+
+.comparison-row:last-child {
+  border-bottom: 0;
+}
+
+.comparison-row span:nth-child(2),
+.comparison-row span:nth-child(3) {
+  min-width: 0;
+}
+
+.comparison-head {
+  background: #111416;
+  color: white;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.comparison-head span {
+  color: inherit;
+  text-transform: uppercase;
 }
 
 .docs-grid {
@@ -401,11 +522,19 @@ h1 {
       linear-gradient(90deg, rgba(251, 250, 246, 0.8), rgba(251, 250, 246, 0.24));
   }
 
-  .nav-actions a {
+  .nav-actions > a:not(.nav-cta):not(.icon-button) {
     display: none;
   }
 
+  .nav-actions {
+    gap: 8px;
+  }
+
   .docs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-layout {
     grid-template-columns: 1fr;
   }
 
@@ -424,18 +553,24 @@ h1 {
   .signal-band {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: min(100% - 32px, 560px);
-    transform: translateY(-18px);
+    margin-bottom: 58px;
   }
 
-  .docs-section {
+  .docs-section,
+  .pricing-section {
     width: min(100% - 32px, 560px);
   }
 
   .docs-section {
-    padding: 18px 0 58px;
+    padding: 18px 0 42px;
   }
 
-  .docs-heading {
+  .pricing-section {
+    padding: 0 0 58px;
+  }
+
+  .docs-heading,
+  .pricing-heading {
     margin-bottom: 20px;
   }
 
@@ -451,9 +586,32 @@ h1 {
     font-size: 12px;
   }
 
+  .comparison-table {
+    overflow-x: auto;
+  }
+
+  .comparison-row {
+    grid-template-columns: 130px repeat(2, minmax(180px, 1fr));
+    min-width: 560px;
+  }
+
 }
 
 @media (max-width: 520px) {
+  .nav {
+    align-items: flex-start;
+  }
+
+  .nav-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .nav-cta {
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
   .eyebrow {
     align-items: flex-start;
     font-size: 12px;
@@ -465,5 +623,390 @@ h1 {
 
   .signal {
     min-height: 96px;
+  }
+}
+
+.mailbox-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(251, 250, 246, 0.9), rgba(251, 250, 246, 1)),
+    var(--paper);
+  padding: 24px;
+}
+
+.mailbox-topbar {
+  width: min(1180px, 100%);
+  min-height: 52px;
+  margin: 0 auto 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mailbox-brand,
+.mailbox-icon-button,
+.mailbox-submit {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mailbox-brand {
+  gap: 9px;
+  font-weight: 850;
+}
+
+.mailbox-shell .mailbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mailbox-icon-button {
+  min-height: 40px;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 13px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.login-panel {
+  width: min(460px, 100%);
+  margin: 92px auto 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdfa;
+  box-shadow: 0 18px 45px rgba(17, 20, 22, 0.08);
+  overflow: hidden;
+}
+
+.login-heading {
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.login-heading span {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: var(--ink);
+}
+
+.login-heading h1 {
+  margin-top: 18px;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.login-heading p {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+  padding: 22px 24px 24px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  color: #293038;
+  font-size: 13px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.login-form input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 13px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  text-transform: none;
+}
+
+.mailbox-shell .login-form .remember-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: #3f4851;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.mailbox-shell .login-form .remember-row input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  accent-color: var(--teal);
+  cursor: pointer;
+}
+
+.login-form input:focus {
+  outline: 2px solid rgba(11, 143, 131, 0.24);
+  border-color: var(--teal);
+}
+
+.form-error {
+  color: #b92d1f;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.mailbox-submit {
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  cursor: pointer;
+}
+
+.mailbox-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mailbox-app {
+  width: min(1180px, 100%);
+  height: calc(100vh - 126px);
+  min-height: 560px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.36fr) minmax(0, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdfa;
+  overflow: hidden;
+}
+
+.message-list {
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  overflow: auto;
+}
+
+.mailbox-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+  background: #fffdfa;
+}
+
+.mailbox-title span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.mailbox-title strong {
+  overflow-wrap: anywhere;
+}
+
+.message-row {
+  width: 100%;
+  display: grid;
+  gap: 5px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 16px 18px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.message-row.active,
+.message-row:hover {
+  background: rgba(199, 244, 100, 0.22);
+}
+
+.message-row span,
+.message-row strong,
+.message-row p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-row span,
+.message-row small {
+  color: var(--muted);
+}
+
+.message-row span {
+  font-size: 13px;
+}
+
+.message-row strong {
+  font-size: 16px;
+}
+
+.message-row small {
+  font-size: 12px;
+}
+
+.message-row p {
+  color: #3f4851;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.message-view {
+  min-width: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.message-header span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.message-header h2 {
+  margin-top: 10px;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1;
+}
+
+.message-header p {
+  margin-top: 8px;
+  color: #3f4851;
+  overflow-wrap: anywhere;
+}
+
+.mailbox-shell .message-body {
+  margin: 0;
+  padding: 24px;
+  color: #20262c;
+  font: inherit;
+  line-height: 1.58;
+  overflow-wrap: anywhere;
+}
+
+.mailbox-shell .message-body p,
+.mailbox-shell .message-body ul,
+.mailbox-shell .message-body h3,
+.mailbox-shell .message-body h4,
+.mailbox-shell .message-body h5 {
+  margin: 0 0 14px;
+}
+
+.mailbox-shell .message-body h3,
+.mailbox-shell .message-body h4,
+.mailbox-shell .message-body h5 {
+  line-height: 1.16;
+}
+
+.mailbox-shell .message-body h3 {
+  font-size: 28px;
+}
+
+.mailbox-shell .message-body h4 {
+  font-size: 22px;
+}
+
+.mailbox-shell .message-body h5 {
+  font-size: 18px;
+}
+
+.mailbox-shell .message-body ul {
+  padding-left: 22px;
+}
+
+.mailbox-shell .message-body a {
+  color: var(--teal);
+  font-weight: 850;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.mailbox-shell .message-body code {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 5px;
+  background: rgba(17, 20, 22, 0.04);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+}
+
+.empty-inbox,
+.empty-message {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-message {
+  flex: 1;
+}
+
+@media (max-width: 760px) {
+  .mailbox-shell {
+    padding: 16px;
+  }
+
+  .login-panel {
+    margin-top: 42px;
+  }
+
+  .mailbox-app {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .message-list {
+    max-height: 360px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .message-header,
+  .mailbox-shell .message-body {
+    padding: 18px;
   }
 }
