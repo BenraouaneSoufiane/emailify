@@ -2,20 +2,23 @@
 
 ## Endpoints
 
-All CROO-facing endpoints accept `POST` JSON bodies.
+All A2MCP-facing endpoints accept `POST` JSON bodies.
 
-- `/api/croo/newTemplate`
+- `/api/a2mcp`
+  - Single public Agent Service Provider endpoint for OKX.AI registration.
+  - Accepts any supported action shape below, infers the action, and returns `{ ok, action, result }`.
+- `/api/a2mcp/newTemplate`
   - `description` string, required
   - `imageUrl` string, optional
   - Sends `description` and `imageUrl` to Venice.ai for template generation
   - Returns `{ ok, html, response, model }`
-- `/api/croo/reserveSender`
+- `/api/a2mcp/reserveSender`
   - `username` string, required
   - `name` string, required
   - `password` string, required. Keep this password; it is used to send from the reserved address and can be reused for inbox login.
   - Creates `username@emailify.site` under `EMAILIFY_SENDER_ROOT`
   - Returns `{ ok, sender }`
-- `/api/croo/send`
+- `/api/a2mcp/send`
   - `to` string, required
   - `title` string, required
   - `body` string, required, HTML accepted
@@ -24,7 +27,7 @@ All CROO-facing endpoints accept `POST` JSON bodies.
   - `password` string, required only when `from` matches an existing reserved sender.
   - `reply_to` or `replyTo` string, optional
   - `attachment` or `attachement`, optional. Use a URL/path string, an object with `url`, `path`, or base64 `content`, or an array of those.
-- `/api/croo/checkInbox`
+- `/api/a2mcp/checkInbox`
   - `username` string, required. May be the reserved username, such as `sales`, or the full reserved address.
   - `address` string, optional alias for `username`
   - `password` string, required
@@ -46,38 +49,48 @@ VENICE_API_KEY=replace_with_your_venice_api_key
 VENICE_MODEL=zai-org-glm-5-1
 ```
 
-## CROO Provider
+## OKX.AI Agent Service Provider
 
-The CROO SDK runs as a separate provider process. Keep the Next app running so
-the provider can call the local Emailify endpoints, then start the provider.
-Use port `3333` with `npm run dev`, and port `3334` with the production build
-started by `npm run start`.
+Register Emailify as an OKX.AI Agent Service Provider with service type **API service** and the public endpoint:
+
+```txt
+https://YOUR_PUBLIC_HOST/api/a2mcp
+```
+
+The endpoint must be public `https://` before registration. Localhost, private IPs, and placeholder domains are rejected by the OKX.AI identity flow.
+
+Suggested service listing fields:
+
+```txt
+Name: Email Delivery API
+Description:
+Emailify sends templated or direct email for apps and agents, with sender reservation and inbox checks.
+Provide action, recipient/sender fields, message content, and reserved sender password when needed.
+Type: API service
+Fee: 0.01
+Endpoint: https://YOUR_PUBLIC_HOST/api/a2mcp
+```
+
+Run locally:
 
 ```sh
-export CROO_API_URL="https://api.croo.network"
-export CROO_WS_URL="wss://api.croo.network/ws"
-export CROO_SDK_KEY="croo_sk_..."
-export EMAILIFY_BASE_URL="http://localhost:3333"
-export CROO_DELIVERABLE_TYPE="schema"
-
 npm run dev
 ```
 
-For the build version, use:
+For the build version:
 
 ```sh
 npm run build
-export EMAILIFY_BASE_URL="http://localhost:3334"
 npm run start
 ```
 
-In another shell:
+You can test the A2MCP adapter against a running app:
 
 ```sh
-npm run croo:provider
+npm run a2mcp:provider -- '{"action":"newTemplate","description":"Launch email for a summer sale","imageUrl":"https://example.com/banner.png"}'
 ```
 
-Requester requirements should be a JSON object string. Supported actions:
+Supported request shapes:
 
 ```json
 {"action":"newTemplate","description":"Launch email for a summer sale","imageUrl":"https://example.com/banner.png"}
@@ -95,7 +108,7 @@ Requester requirements should be a JSON object string. Supported actions:
 {"action":"checkInbox","username":"sales","password":"keep-this-secret"}
 ```
 
-If `action` is omitted, the provider infers it from required fields.
+If `action` is omitted, Emailify infers it from required fields.
 
 For hosted SMTP instead of local Postfix:
 

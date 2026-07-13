@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import { RotatingKeyword } from "@/components/RotatingKeyword";
 
-const crooAgentUrl =
-  "https://agent.croo.network/agents/53be746a-820c-41c9-8d97-6badd0a76e62";
+const okxAiUrl = "https://web3.okx.com/okx-ai";
 
 const checks = [
   "No DNS records needed (SPF, DKIM, ...)",
@@ -25,23 +24,23 @@ const checks = [
 const docsSteps = [
   {
     icon: Code2,
-    title: "Create order",
-    body: "Submit the email request as a structured CAP order with recipient, title, body, sender, and optional reply-to.",
+    title: "Call A2MCP",
+    body: "Submit a structured Emailify request with recipient, title, body, sender, and optional reply-to.",
   },
   {
     icon: CreditCard,
-    title: "Lock payment",
-    body: "CROO locks the agreed pay-per-message amount before Emailify starts the delivery work.",
+    title: "Use OKX.AI billing",
+    body: "OKX.AI routes the API service request through your registered Agent Service Provider listing.",
   },
   {
     icon: ClipboardCheck,
     title: "Receive delivery",
-    body: "Emailify processes the order and returns the delivery result or state update to the client.",
+    body: "Emailify processes the request and returns a delivery result to the caller.",
   },
   {
     icon: Check,
-    title: "Clear settlement",
-    body: "When delivery is accepted, CROO clears the order and releases payment automatically.",
+    title: "Return result",
+    body: "The A2MCP endpoint responds with the action, provider result, and delivery metadata.",
   },
 ];
 
@@ -59,7 +58,7 @@ const pricingItems = [
   {
     label: "Receive and check messages",
     price: "Free*",
-    detail: "Getting messages through CROO is not totally free, but almost free: only 0.0001 USDC.",
+    detail: "Mailbox reads stay available through the same A2MCP service endpoint.",
   },
 ];
 
@@ -81,17 +80,17 @@ const comparisonRows = [
   },
   {
     feature: "Payment",
-    emailify: "Wallet with USDC on Base",
+    emailify: "OKX.AI service billing",
     native: "Credit card",
   },
   {
     feature: "Sending surface",
-    emailify: "CROO UI or integration",
+    emailify: "OKX.AI ASP listing or direct A2MCP",
     native: "API only",
   },
   {
     feature: "Developer path",
-    emailify: "CROO SDK",
+    emailify: "A2MCP endpoint",
     native: "Any SMTP library",
   },
   {
@@ -143,7 +142,7 @@ export default function Home() {
             <a href="#signals">Signals</a>
             <a
               className="nav-cta nav-cta-primary"
-              href={crooAgentUrl}
+              href={okxAiUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -167,7 +166,7 @@ export default function Home() {
           <div className="hero-copy">
             <div className="eyebrow">
               <ShieldCheck size={16} aria-hidden="true" />
-              Instant email delivery through CROO
+              Instant email delivery through OKX.AI
             </div>
             <h1>
               deliver quickly <RotatingKeyword /> emails
@@ -179,7 +178,7 @@ export default function Home() {
             <div className="cta-row">
               <a
                 className="primary-cta"
-                href={crooAgentUrl}
+                href={okxAiUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -204,11 +203,11 @@ export default function Home() {
 
       <section className="docs-section" id="docs">
         <div className="docs-heading">
-          <p className="section-kicker">Croo.network layer</p>
-          <h2>Order email delivery through CROO.</h2>
+          <p className="section-kicker">OKX.AI A2MCP layer</p>
+          <h2>Order email delivery through OKX.AI.</h2>
           <p>
-            Clients create an order, lock payment, receive the delivery result,
-            and let CROO clear settlement automatically through the CAP lifecycle.
+            Clients call Emailify as an API service, receive the delivery result,
+            and use your OKX.AI Agent Service Provider identity as the listing layer.
           </p>
         </div>
 
@@ -227,9 +226,9 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="code-panel" aria-label="CAP order example">
+          <div className="code-panel" aria-label="A2MCP request example">
             <div className="code-panel-header">
-              <span>CAP order</span>
+              <span>A2MCP request</span>
               <span>JSON</span>
             </div>
             <pre>

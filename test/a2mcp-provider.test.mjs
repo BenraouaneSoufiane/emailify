@@ -6,9 +6,9 @@ import {
   parseRequirements,
   payloadForAction,
   routeForAction,
-} from "../scripts/croo-provider.mjs";
+} from "../scripts/a2mcp-provider.mjs";
 
-test("infers newTemplate from Croo UI template prompt aliases", () => {
+test("infers newTemplate from template prompt aliases", () => {
   const aliases = [
     { prompt: "Create a launch email" },
     { brief: "Create a launch email" },
@@ -50,8 +50,8 @@ test("maps template aliases to the API description payload", () => {
   });
 });
 
-test("keeps the newTemplate route stable", () => {
-  assert.equal(routeForAction("newTemplate"), "/api/croo/newTemplate");
+test("keeps the newTemplate route on A2MCP", () => {
+  assert.equal(routeForAction("newTemplate"), "/api/a2mcp/newTemplate");
 });
 
 test("infers send from task-based email requests", () => {
@@ -159,8 +159,8 @@ test("infers checkInbox from username and password", () => {
   );
 });
 
-test("keeps the checkInbox route stable", () => {
-  assert.equal(routeForAction("checkInbox"), "/api/croo/checkInbox");
+test("keeps the checkInbox route on A2MCP", () => {
+  assert.equal(routeForAction("checkInbox"), "/api/a2mcp/checkInbox");
 });
 
 test("parses JSON object requirements", () => {

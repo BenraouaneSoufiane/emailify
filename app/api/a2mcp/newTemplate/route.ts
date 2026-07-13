@@ -1,4 +1,4 @@
-import { fail, ok, optionalString, readJson, requireString } from "@/lib/croo";
+import { fail, ok, optionalString, readJson, requireString } from "@/lib/a2mcp";
 import { generateTemplateWithVenice } from "@/lib/venice";
 
 export const runtime = "nodejs";

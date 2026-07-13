@@ -1,4 +1,4 @@
-import { fail, ok, optionalString, readJson, requireString } from "@/lib/croo";
+import { fail, ok, optionalString, readJson, requireString } from "@/lib/a2mcp";
 import { sendEmail } from "@/lib/mailer";
 import { findSenderByAddress, requireSenderPassword } from "@/lib/senders";
 

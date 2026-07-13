@@ -276,7 +276,7 @@ export function InboxClient() {
               <Inbox size={18} aria-hidden="true" />
             </span>
             <h1>Inbox login</h1>
-            <p>Use the reserved Emailify address and password created through CROO.</p>
+            <p>Use the reserved Emailify address and password created through A2MCP.</p>
           </div>
 
           <form className="login-form" onSubmit={submitLogin}>

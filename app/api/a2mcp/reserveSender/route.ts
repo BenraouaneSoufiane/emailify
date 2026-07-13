@@ -1,4 +1,4 @@
-import { fail, getBaseUrl, ok, readJson, requireString } from "@/lib/croo";
+import { fail, getBaseUrl, ok, readJson, requireString } from "@/lib/a2mcp";
 import { createSender } from "@/lib/senders";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     return ok(
       {
         sender: publicSender,
-        senderPath: `${getBaseUrl(request)}/api/croo/reserveSender`,
+        senderPath: `${getBaseUrl(request)}/api/a2mcp/reserveSender`,
       },
       201,
     );
